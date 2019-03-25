@@ -3,6 +3,8 @@ package main
 import (
   "fmt"
   "net/http"
+
+  "github.com/julienschmidt/httprouter"
 )
 
 // Handler for whenever our webpage receives an HTTP request
@@ -21,10 +23,17 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
   fmt.Printf("%s accessed.\n", r.URL.Path)
 }
 
+func Hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+    fmt.Fprintf(w, "hello, %s!\n", ps.ByName("name"))
+}
+
 func main() {
-  http.HandleFunc("/", rootHandler)
-  // nil here means to use the default ServerMux
+  router := httprouter.New()
+  //router.GET("/", rootHandler)
+  router.GET("/hello/:name", Hello)
+  //http.HandleFunc("/", rootHandler)
   url := "localhost:3000"
   fmt.Printf("Web server running on %s\n", url)
-  http.ListenAndServe(url, nil)
+  // nil instead of router here means to use the default ServeMux
+  http.ListenAndServe(url, router)
 }
